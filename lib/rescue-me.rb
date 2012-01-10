@@ -1,4 +1,5 @@
 require "rescue_me/version"
+require 'net/http'
 require 'net/smtp'
 
 # Example:
