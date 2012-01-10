@@ -1,4 +1,4 @@
-# Rescue::Me
+# RescueMe
 
 Instead of hardcoding lists of exceptions to rescue, put them in one place!
 
