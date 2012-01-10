@@ -3,13 +3,19 @@ require 'spec_helper'
 describe RescueMe do
   subject { RescueMe }
 
+  def should_return_a_list_of_errors(method)
+    errors = subject.send(method)
+    errors.class.should == Array
+    errors.empty?.should be_false
+  end
+
   describe '.net_http_errors' do
     before :each do
       Net::HTTP.send(:remove_const, :Persistent) if defined? Net::HTTP::Persistent
     end
 
     it 'should return a list of errors' do
-      subject.net_http_errors.class.should == Array
+      should_return_a_list_of_errors(:net_http_errors)
     end
 
     it 'should include Net::HTTP:Persistent::Error if that library is defined' do
@@ -33,15 +39,36 @@ describe RescueMe do
   end
 
   describe '.net_smtp_server_errors' do
+    it 'should return a list of errors' do
+      should_return_a_list_of_errors(:net_smtp_server_errors)
+    end
 
+    it 'should include Net::SMTPAuthenticationError' do
+      subject.net_smtp_server_errors.include?(Net::SMTPAuthenticationError).should be_true
+    end
+
+    it 'should not include Net::SMTPAuthenticationError when disabled' do
+      subject.net_smtp_server_errors(:with_auth => false).include?(Net::SMTPAuthenticationError).should be_false
+    end
   end
   
   describe '.net_smtp_client_errors' do
+    it 'should return a list of errors' do
+      should_return_a_list_of_errors(:net_smtp_client_errors)
+    end
 
+    it 'should not include Net::SMTPAuthenticationError' do
+      subject.net_smtp_client_errors.include?(Net::SMTPAuthenticationError).should be_false
+    end
+    it 'should include Net::SMTPAuthenticationError when enabled' do
+      subject.net_smtp_client_errors(:with_auth => true).include?(Net::SMTPAuthenticationError).should be_true
+    end
   end
 
   describe '.net_smtp_errors' do
-
+    it 'should return a list of errors' do
+      should_return_a_list_of_errors(:net_smtp_errors)
+    end
   end
 
   context 'errors with' do
