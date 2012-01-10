@@ -63,7 +63,7 @@ module RescueMe
   end
 
   private
-  def errors_with(errors_sym, arg, opts)
+  def errors_with(errors_sym, arg, opts = {})
     if arg.kind_of? Array
       ary = arg
     elsif arg.is_a?(Class) && arg.ancestors.include?(Exception)

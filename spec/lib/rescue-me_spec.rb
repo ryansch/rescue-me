@@ -45,6 +45,60 @@ describe RescueMe do
   end
 
   context 'errors with' do
+    before :all do
+      class FooError < StandardError; end
+      class BarError < StandardError; end
+      class OrigError < StandardError; end
+    end
 
+    let(:test_ary) { [FooError, BarError] }
+
+    before :each do
+      subject.stub(:errors => [OrigError])
+    end
+
+    context 'a passed array' do
+      it 'should include the array' do
+        errors = subject.send(:errors_with, :errors, test_ary)
+
+        test_ary.each do |a|
+          errors.include?(a).should be_true
+        end
+      end
+
+      it 'should have the original elements' do
+        subject.send(:errors_with, :errors, [FooError, BarError]).include?(OrigError).should be_true
+      end
+    end
+
+    context 'a single exception' do
+      it 'should add the exception' do
+        subject.send(:errors_with, :errors, FooError).include?(FooError).should be_true
+      end
+
+      it 'should have the original elements' do
+        subject.send(:errors_with, :errors, FooError).include?(OrigError).should be_true
+      end
+    end
+
+    context 'a set' do
+      let(:set) { Set.new(test_ary) }
+
+      it 'should add the elements of the set' do
+        errors = subject.send(:errors_with, :errors, set)
+
+        set.each do |s|
+          errors.include?(s).should be_true
+        end
+      end
+
+      it 'should have the original elements' do
+        errors = subject.send(:errors_with, :errors, set).include?(OrigError).should be_true
+      end
+    end
+
+    it 'should raise an ArgumentError when a bad argument is passed' do
+      lambda { subject.send(:errors_with, :errors, 42) }.should raise_error ArgumentError
+    end
   end
 end
