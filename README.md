@@ -1,6 +1,6 @@
 # Rescue::Me
 
-TODO: Write a gem description
+Instead of hardcoding lists of exceptions to rescue, put them in one place!
 
 ## Installation
 
