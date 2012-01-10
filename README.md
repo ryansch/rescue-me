@@ -1,4 +1,4 @@
-# RescueMe
+# RescueMe [![Build Status](https://secure.travis-ci.org/ryansch/rescue-me.png?branch=master)](http://travis-ci.org/ryansch/rescue-me)
 
 Instead of hardcoding lists of exceptions to rescue, put them in one place!
 
