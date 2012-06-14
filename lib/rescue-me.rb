@@ -70,7 +70,7 @@ module RescueMe
     net_smtp_server_errors + net_smtp_client_errors
   end
 
-  %w[net_http net_smtp_server net_smtp_client net_smtp].each do |type|
+  %w[net_http active_resource net_smtp_server net_smtp_client net_smtp].each do |type|
     define_method(type + '_errors_with') do |arg, *opts|
       opts = opts.first || Hash.new
       errors_with((type + '_errors').to_sym, arg, opts)
