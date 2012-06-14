@@ -12,6 +12,7 @@ describe RescueMe do
   describe '.net_http_errors' do
     before :each do
       Net::HTTP.send(:remove_const, :Persistent) if defined? Net::HTTP::Persistent
+      OpenSSL::SSL.send(:remove_const, :SSLError) if defined? OpenSSL::SSL::SSLError
     end
 
     it 'should return a list of errors' do
@@ -20,7 +21,7 @@ describe RescueMe do
 
     it 'should include Net::HTTP:Persistent::Error if that library is defined' do
       class Net::HTTP::Persistent
-        class Error < Exception; end
+        class Error; end
       end
 
       subject.net_http_errors.include?(Net::HTTP::Persistent::Error).should be_true
@@ -31,10 +32,58 @@ describe RescueMe do
 
       # Define this after the method so we can ask the array if it's included.
       class Net::HTTP::Persistent
-        class Error < Exception; end
+        class Error; end
       end
 
       errors.include?(Net::HTTP::Persistent::Error).should be_false
+    end
+
+    it 'should include OpenSSL::SSL::SSLError if that library is defined' do
+      module OpenSSL::SSL
+        class SSLError
+        end
+      end
+
+      subject.net_http_errors.include?(OpenSSL::SSL::SSLError).should be_true
+    end
+
+    it 'should not include OpenSSL::SSL::SSLError if that library is not defined' do
+      errors = subject.net_http_errors
+
+      class OpenSSL::SSL::SSLError < StandardError
+      end
+
+      errors.include?(OpenSSL::SSL::SSLError).should be_false
+    end
+  end
+
+  describe '.active_resource_errors' do
+    before :each do
+      ActiveResource.send(:remove_const, :ConnectionError) if defined? ActiveResource::ConnectionError
+    end
+
+    it 'should return a list of errors' do
+      should_return_a_list_of_errors(:active_resource_errors)
+    end
+
+    it 'should include ActiveResource::ConnectionError if it is defined' do
+      class ActiveResource
+        class ConnectionError
+        end
+      end
+
+      subject.active_resource_errors.include?(ActiveResource::ConnectionError).should be_true
+    end
+
+    it 'should not include ActiveResource::ConnectionError if it is not defined' do
+      errors = subject.active_resource_errors
+
+      class ActiveResource
+        class ConnectionError
+        end
+      end
+
+      errors.include?(ActiveResource::ConnectionError).should be_false
     end
   end
 
