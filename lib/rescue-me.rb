@@ -16,6 +16,9 @@ module RescueMe
     err = [Timeout::Error,
             Errno::EINVAL,
             Errno::ECONNRESET,
+            Errno::EPIPE,
+            Errno::ECONNABORTED,
+            Errno::EBADF,
             EOFError,
             SocketError,
             Net::HTTPBadResponse,
@@ -23,6 +26,18 @@ module RescueMe
             Net::ProtocolError]
 
     err << Net::HTTP::Persistent::Error if defined? Net::HTTP::Persistent::Error
+    err << OpenSSL::SSL::SSLError if defined? OpenSSL::SSL::SSLError
+
+    err
+  end
+
+  def active_resource_errors(opts = {})
+    err = net_http_errors(opts)
+
+    if defined? ActiveResource::ConnectionError
+      err.delete(Timeout::Error)
+      err << ActiveResource::ConnectionError
+    end
 
     err
   end
