@@ -36,7 +36,7 @@ module RescueMe
 
     if defined? ActiveResource::ConnectionError
       err.delete(Timeout::Error)
-      err << [ActiveResource::TimeoutError, ActiveResource::SSLError, ActiveResource::ServerError]
+      err += [ActiveResource::TimeoutError, ActiveResource::SSLError, ActiveResource::ServerError]
     end
 
     err
