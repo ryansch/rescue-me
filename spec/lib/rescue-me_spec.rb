@@ -24,7 +24,7 @@ describe RescueMe do
         class Error; end
       end
 
-      subject.net_http_errors.include?(Net::HTTP::Persistent::Error).should be_true
+      subject.net_http_errors.should include(Net::HTTP::Persistent::Error)
     end
 
     it 'should not include Net::HTTP:Persistent::Error if that library is not defined' do
@@ -35,7 +35,7 @@ describe RescueMe do
         class Error; end
       end
 
-      errors.include?(Net::HTTP::Persistent::Error).should be_false
+      errors.should_not include(Net::HTTP::Persistent::Error)
     end
 
     it 'should include OpenSSL::SSL::SSLError if that library is defined' do
@@ -44,7 +44,7 @@ describe RescueMe do
         end
       end
 
-      subject.net_http_errors.include?(OpenSSL::SSL::SSLError).should be_true
+      subject.net_http_errors.should include(OpenSSL::SSL::SSLError)
     end
 
     it 'should not include OpenSSL::SSL::SSLError if that library is not defined' do
@@ -53,37 +53,48 @@ describe RescueMe do
       class OpenSSL::SSL::SSLError < StandardError
       end
 
-      errors.include?(OpenSSL::SSL::SSLError).should be_false
+      errors.should_not include(OpenSSL::SSL::SSLError)
     end
   end
 
   describe '.active_resource_errors' do
     before :each do
       ActiveResource.send(:remove_const, :ConnectionError) if defined? ActiveResource::ConnectionError
+      ActiveResource.send(:remove_const, :TimeoutError) if defined? ActiveResource::TimeoutError
+      ActiveResource.send(:remove_const, :SSLError) if defined? ActiveResource::SSLError
+      ActiveResource.send(:remove_const, :ServerError) if defined? ActiveResource::ServerError
     end
 
     it 'should return a list of errors' do
       should_return_a_list_of_errors(:active_resource_errors)
     end
 
-    it 'should include ActiveResource::ConnectionError if it is defined' do
+    it 'should include ActiveResource::ConnectionError decendents if it is defined' do
       class ActiveResource
         class ConnectionError
         end
+
+        class TimeoutError < ConnectionError; end
+        class SSLError < ConnectionError; end
+        class ServerError < ConnectionError; end
       end
 
-      subject.active_resource_errors.include?(ActiveResource::ConnectionError).should be_true
+      subject.active_resource_errors.should include(ActiveResource::TimeoutError, ActiveResource::SSLError, ActiveResource::ServerError)
     end
 
-    it 'should not include ActiveResource::ConnectionError if it is not defined' do
+    it 'should not include ActiveResource::ConnectionError decendents if it is not defined' do
       errors = subject.active_resource_errors
 
       class ActiveResource
         class ConnectionError
         end
+
+        class TimeoutError < ConnectionError; end
+        class SSLError < ConnectionError; end
+        class ServerError < ConnectionError; end
       end
 
-      errors.include?(ActiveResource::ConnectionError).should be_false
+      errors.should_not include(ActiveResource::TimeoutError, ActiveResource::SSLError, ActiveResource::ServerError)
     end
   end
 
@@ -93,11 +104,11 @@ describe RescueMe do
     end
 
     it 'should include Net::SMTPAuthenticationError' do
-      subject.net_smtp_server_errors.include?(Net::SMTPAuthenticationError).should be_true
+      subject.net_smtp_server_errors.should include(Net::SMTPAuthenticationError)
     end
 
     it 'should not include Net::SMTPAuthenticationError when disabled' do
-      subject.net_smtp_server_errors(:with_auth => false).include?(Net::SMTPAuthenticationError).should be_false
+      subject.net_smtp_server_errors(:with_auth => false).should_not include(Net::SMTPAuthenticationError)
     end
   end
   
@@ -107,10 +118,10 @@ describe RescueMe do
     end
 
     it 'should not include Net::SMTPAuthenticationError' do
-      subject.net_smtp_client_errors.include?(Net::SMTPAuthenticationError).should be_false
+      subject.net_smtp_client_errors.should_not include(Net::SMTPAuthenticationError)
     end
     it 'should include Net::SMTPAuthenticationError when enabled' do
-      subject.net_smtp_client_errors(:with_auth => true).include?(Net::SMTPAuthenticationError).should be_true
+      subject.net_smtp_client_errors(:with_auth => true).should include(Net::SMTPAuthenticationError)
     end
   end
 
@@ -138,22 +149,22 @@ describe RescueMe do
         errors = subject.send(:errors_with, :errors, test_ary)
 
         test_ary.each do |a|
-          errors.include?(a).should be_true
+          errors.should include(a)
         end
       end
 
       it 'should have the original elements' do
-        subject.send(:errors_with, :errors, [FooError, BarError]).include?(OrigError).should be_true
+        subject.send(:errors_with, :errors, [FooError, BarError]).should include(OrigError)
       end
     end
 
     context 'a single exception' do
       it 'should add the exception' do
-        subject.send(:errors_with, :errors, FooError).include?(FooError).should be_true
+        subject.send(:errors_with, :errors, FooError).should include(FooError)
       end
 
       it 'should have the original elements' do
-        subject.send(:errors_with, :errors, FooError).include?(OrigError).should be_true
+        subject.send(:errors_with, :errors, FooError).should include(OrigError)
       end
     end
 
@@ -164,12 +175,12 @@ describe RescueMe do
         errors = subject.send(:errors_with, :errors, set)
 
         set.each do |s|
-          errors.include?(s).should be_true
+          errors.should include(s)
         end
       end
 
       it 'should have the original elements' do
-        errors = subject.send(:errors_with, :errors, set).include?(OrigError).should be_true
+        errors = subject.send(:errors_with, :errors, set).should include(OrigError)
       end
     end
 
